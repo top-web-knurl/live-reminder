@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
+  <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
+  <title>Rminder</title>
+</head>
+
+<body>
+  <div id="app" class="app">
+    <div class="container">
+      <header class="header">
+        <div class="search">
+          <input type="text" placeholder="Поиск">
+        </div>
+      </header>
+      <div class="app__primary">
+        <aside class="left-col">
+          <ul class="left-col__menu">
+            <li>Напоминания</li>
+            <li>Архив</li>
+          </ul>
+        </aside>
+        <main class="main">
+          <div class="reminder-list">
+            <div class="reminder-list__add">
+              Добавить +
+            </div>
+            <div class="card-reminder">
+              <div class="card-reminder__header">
+                <h4 class="card-reminder__title">Заголовок Напоминания</h4>
+                <time datetime="">
+                    Время до напоминания 27.05.06 18:10 (Если сегодня дату не пишем)
+                </time>
+              </div>
+              <div class="card-reminder__caption">
+                 <p>Какойто текст с редактирование в редакторе + вложения картинки</p>
+                  <p>Вложенные файлы </p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <script src="./renderer.js"></script>
+</body>
+
+</html>
