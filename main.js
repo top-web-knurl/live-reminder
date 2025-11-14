@@ -1,5 +1,5 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage } = require('electron');
-const {getDB} = require('./src/reminders');
+const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain } = require('electron');
+const { getDB } = require('./src/reminders');
 const path = require('path');
 
 // Глобальные переменные (чтобы сборщик не удалил ссылки)
@@ -8,6 +8,7 @@ let tray = null;
 
 // Путь к иконке трея (должна быть .ico на Windows, .png на macOS/Linux)
 const trayIconPath = path.join(__dirname, 'assets', 'icon.png'); // или .ico
+
 
 app.whenReady().then(() => {
   createWindow();

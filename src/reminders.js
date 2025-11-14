@@ -6,6 +6,5 @@ function getDB() {
   if (!db) {
     db = initDB();
   }
-  alert("db Работает");
   return db;
 }
