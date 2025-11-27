@@ -5,7 +5,8 @@
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
   <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
-  <title>Rminder</title>
+  <title>Напоминалка</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -19,32 +20,91 @@
       <div class="app__primary">
         <aside class="left-col">
           <ul class="left-col__menu">
-            <li>Напоминания</li>
-            <li>Архив</li>
+            <li class="menu-item active" data-tab="reminders">Напоминания</li>
+            <li class="menu-item" data-tab="archive">Архив</li>
           </ul>
         </aside>
         <main class="main">
-          <div class="reminder-list">
-            <div class="reminder-list__add">
-              Добавить +
+          <!-- Reminders Tab -->
+          <div id="remindersTab" class="tab-content active">
+            <div class="reminder-list">
+              <div class="reminder-list__add" id="openModalBtn">
+                Добавить +
+              </div>
+              <div id="remindersContainer">
+                <!-- Reminders will be loaded here -->
+              </div>
             </div>
-            <div class="card-reminder">
-              <div class="card-reminder__header">
-                <h4 class="card-reminder__title">Заголовок Напоминания</h4>
-                <time datetime="">
-                    Время до напоминания 27.05.06 18:10 (Если сегодня дату не пишем)
-                </time>
-              </div>
-              <div class="card-reminder__caption">
-                 <p>Какойто текст с редактирование в редакторе + вложения картинки</p>
-                  <p>Вложенные файлы </p>
-              </div>
+          </div>
+
+          <!-- Archive Tab -->
+          <div id="archiveTab" class="tab-content">
+            <div class="archive-header">
+              <h2>Архив</h2>
+              <button id="clearArchiveBtn" class="btn btn-danger">Очистить архив</button>
+            </div>
+            <div id="archiveContainer">
+              <!-- Archived reminders will be loaded here -->
             </div>
           </div>
         </main>
       </div>
     </div>
   </div>
+
+  <!-- Create/Edit Reminder Modal -->
+  <div id="reminderModal" class="modal">
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Новое напоминание</h2>
+        <button class="modal-close" id="closeModalBtn">&times;</button>
+      </div>
+      <form id="reminderForm">
+        <input type="hidden" id="reminderId" value="">
+        <div class="form-group">
+          <label for="reminderTitle">Название *</label>
+          <input type="text" id="reminderTitle" name="title" required placeholder="Введите название напоминания">
+        </div>
+        <div class="form-group">
+          <label for="reminderText">Описание</label>
+          <textarea id="reminderText" name="text" rows="4" placeholder="Дополнительная информация (необязательно)"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reminderDate">Дата *</label>
+            <input type="date" id="reminderDate" name="date" required>
+          </div>
+          <div class="form-group">
+            <label for="reminderTime">Время *</label>
+            <input type="time" id="reminderTime" name="time" required>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="cancelBtn">Отмена</button>
+          <button type="submit" class="btn btn-primary" id="saveBtn">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirmation Dialog -->
+  <div id="confirmDialog" class="modal">
+    <div class="modal-overlay" id="confirmOverlay"></div>
+    <div class="modal-content confirm-dialog">
+      <div class="modal-header">
+        <h2 id="confirmTitle">Подтверждение</h2>
+      </div>
+      <div class="confirm-body">
+        <p id="confirmMessage"></p>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" id="confirmCancel">Отмена</button>
+        <button class="btn btn-danger" id="confirmOk">Удалить</button>
+      </div>
+    </div>
+  </div>
+
   <script src="./renderer.js"></script>
 </body>
 
