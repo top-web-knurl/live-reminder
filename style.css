@@ -41,7 +41,7 @@ body {
 
 .header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   margin-bottom: 20px;
   padding: 15px;
@@ -55,6 +55,19 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 4px;
   width: 300px;
+}
+
+.header-logo {
+  height: 40px;
+  width: 40px;
+  object-fit: contain;
+  margin-right: 15px;
+  border-radius: 8px;
+  transition: transform 0.2s;
+}
+
+.header-logo:hover {
+  transform: scale(1.05);
 }
 
 .app__primary {
@@ -547,4 +560,107 @@ body {
 .message-info {
   background-color: var(--success-color);
   color: white;
+}
+
+/* Badge for overdue count */
+.badge {
+  display: inline-block;
+  background-color: var(--error-color);
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 8px;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Reminder Card Styles */
+.reminder-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+  border-left: 4px solid transparent;
+}
+
+.reminder-card.pinned {
+  border-left-color: var(--pin-color);
+  background: linear-gradient(to right, #fff5f5 0%, #ffffff 10%);
+}
+
+.reminder-card.overdue {
+  border-left-color: var(--error-color);
+  background: linear-gradient(to right, #fff0f0 0%, #ffffff 10%);
+}
+
+.reminder-card.archived {
+  opacity: 0.8;
+  border-left-color: #999;
+}
+
+.reminder-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.reminder-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.reminder-card__title {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text-color);
+  flex: 1;
+}
+
+.reminder-card__actions {
+  display: flex;
+  gap: 5px;
+}
+
+.reminder-card__time {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.reminder-card__text {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.reminder-card__footer {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-icon {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  background: var(--bg-color);
+  transform: scale(1.1);
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 13px;
 }

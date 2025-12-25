@@ -13,6 +13,7 @@
   <div id="app" class="app">
     <div class="container">
       <header class="header">
+        <img src="assets/icon.png" alt="Напоминалка" class="header-logo">
         <div class="search">
           <input type="text" placeholder="Поиск">
         </div>
@@ -20,7 +21,10 @@
       <div class="app__primary">
         <aside class="left-col">
           <ul class="left-col__menu">
-            <li class="menu-item active" data-tab="reminders">Напоминания</li>
+            <li class="menu-item active" data-tab="reminders">
+              Напоминания
+              <span id="overdueCount" class="badge" style="display: none;"></span>
+            </li>
             <li class="menu-item" data-tab="archive">Архив</li>
           </ul>
         </aside>

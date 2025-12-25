@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initializeTabSwitching();
   initializeModal();
   initializeConfirmDialog();
+  initializeClearArchiveButton();
   await loadReminders();
 });
 
@@ -167,6 +168,8 @@ async function loadReminders() {
     console.error('Load reminders error:', error);
     container.innerHTML = '<p class="error">Ошибка: ' + error.message + '</p>';
   }
+  
+  updateOverdueBadge();
 }
 
 // Load archived reminders
@@ -204,6 +207,24 @@ async function markViewed(id) {
   }
 }
 
+// Update overdue badge count
+function updateOverdueBadge() {
+  const badge = document.getElementById('overdueCount');
+  if (!badge) return;
+  
+  const now = new Date();
+  const overdueCount = remindersList.filter(reminder => {
+    return new Date(reminder.reminder_time) < now && !reminder.is_viewed;
+  }).length;
+  
+  if (overdueCount > 0) {
+    badge.textContent = overdueCount;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
 // Confirmation dialog
 function initializeConfirmDialog() {
   const overlay = document.getElementById('confirmOverlay');
@@ -228,6 +249,30 @@ function showConfirm(title, message, callback) {
 function closeConfirm() {
   document.getElementById('confirmDialog').classList.remove('active');
   confirmCallback = null;
+}
+
+// Clear Archive Button
+function initializeClearArchiveButton() {
+  const clearArchiveBtn = document.getElementById('clearArchiveBtn');
+  
+  if (clearArchiveBtn) {
+    clearArchiveBtn.addEventListener('click', () => {
+      showConfirm('Очистить архив?', 'Все архивные напоминания будут удалены навсегда. Это действие нельзя отменить.', async () => {
+        try {
+          const result = await window.dbAPI.clearArchive();
+          if (result.success) {
+            showMessage('Архив очищен', 'success');
+            await loadArchivedReminders();
+          } else {
+            showMessage('Ошибка при очистке архива: ' + result.message, 'error');
+          }
+        } catch (error) {
+          console.error('Clear archive error:', error);
+          showMessage('Ошибка при очистке архива', 'error');
+        }
+      });
+    });
+  }
 }
 
 // Helper functions
@@ -291,9 +336,9 @@ function createReminderCard(reminder) {
       </div>
       <div class="reminder-card__time">${dateStr}</div>
       ${reminder.text ? `<div class="reminder-card__text">${escapeHtml(reminder.text)}</div>` : ''}
-      ${!reminder.is_viewed ? `
+      ${reminder.is_shown && !reminder.is_viewed ? `
         <div class="reminder-card__footer">
-          <button class="btn btn-small btn-primary view-btn">Прочитано</button>
+          <button class="btn btn-small btn-primary view-btn">Закрыть напоминание</button>
         </div>
       ` : ''}
     </div>
