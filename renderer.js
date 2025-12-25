@@ -3,6 +3,7 @@ let currentTab = 'reminders';
 let editingReminderId = null;
 let confirmCallback = null;
 let remindersList = [];
+let currentSearchQuery = '';
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initializeModal();
   initializeConfirmDialog();
   initializeClearArchiveButton();
+  initializeSearch();
   await loadReminders();
 });
 
@@ -155,10 +157,14 @@ async function loadReminders() {
     
     if (result.success && result.reminders) {
       remindersList = result.reminders;
-      if (result.reminders.length === 0) {
+      const filtered = filterReminders(remindersList, currentSearchQuery);
+      
+      if (remindersList.length === 0) {
         container.innerHTML = '<p class="no-reminders">Нет напоминаний. Создайте первое!</p>';
+      } else if (filtered.length === 0) {
+        container.innerHTML = '<p class="no-reminders">Ничего не найдено</p>';
       } else {
-        container.innerHTML = result.reminders.map(reminder => createReminderCard(reminder)).join('');
+        container.innerHTML = filtered.map(reminder => createReminderCard(reminder)).join('');
         attachReminderEventListeners();
       }
     } else {
@@ -180,10 +186,14 @@ async function loadArchivedReminders() {
     const result = await window.dbAPI.getArchivedReminders();
     
     if (result.success && result.reminders) {
+      const filtered = filterReminders(result.reminders, currentSearchQuery);
+      
       if (result.reminders.length === 0) {
         container.innerHTML = '<p class="no-reminders">Архив пуст</p>';
+      } else if (filtered.length === 0) {
+        container.innerHTML = '<p class="no-reminders">Ничего не найдено в архиве</p>';
       } else {
-        container.innerHTML = result.reminders.map(reminder => createArchivedReminderCard(reminder)).join('');
+        container.innerHTML = filtered.map(reminder => createArchivedReminderCard(reminder)).join('');
         attachArchiveEventListeners();
       }
     } else {
@@ -273,6 +283,86 @@ function initializeClearArchiveButton() {
       });
     });
   }
+}
+
+// Search functionality
+function initializeSearch() {
+  const searchInput = document.getElementById('searchInput');
+  const clearBtn = document.getElementById('clearSearch');
+  
+  if (!searchInput || !clearBtn) return;
+  
+  // Debounced search handler
+  const debouncedSearch = debounce((query) => {
+    currentSearchQuery = query.toLowerCase().trim();
+    
+    // Show/hide clear button
+    if (currentSearchQuery) {
+      clearBtn.style.display = 'flex';
+    } else {
+      clearBtn.style.display = 'none';
+    }
+    
+    // Reload current tab with search
+    if (currentTab === 'reminders') {
+      loadReminders();
+    } else if (currentTab === 'archive') {
+      loadArchivedReminders();
+    }
+  }, 300);
+  
+  // Input event
+  searchInput.addEventListener('input', (e) => {
+    debouncedSearch(e.target.value);
+  });
+  
+  // Clear button
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    currentSearchQuery = '';
+    clearBtn.style.display = 'none';
+    
+    if (currentTab === 'reminders') {
+      loadReminders();
+    } else if (currentTab === 'archive') {
+      loadArchivedReminders();
+    }
+  });
+  
+  // Clear on Escape key
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      searchInput.value = '';
+      currentSearchQuery = '';
+      clearBtn.style.display = 'none';
+      
+      if (currentTab === 'reminders') {
+        loadReminders();
+      } else if (currentTab === 'archive') {
+        loadArchivedReminders();
+      }
+    }
+  });
+}
+
+// Debounce helper
+function debounce(func, delay) {
+  let timeoutId;
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+// Filter reminders by search query
+function filterReminders(reminders, query) {
+  if (!query) return reminders;
+  
+  return reminders.filter(reminder => {
+    const titleMatch = reminder.title.toLowerCase().includes(query);
+    const textMatch = reminder.text && reminder.text.toLowerCase().includes(query);
+    return titleMatch || textMatch;
+  });
 }
 
 // Helper functions
