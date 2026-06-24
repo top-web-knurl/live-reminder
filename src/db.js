@@ -64,6 +64,23 @@ function initDB() {
         });
       }
     });
+
+    db.run(`
+      CREATE TABLE IF NOT EXISTS templates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        text TEXT,
+        is_pinned INTEGER DEFAULT 0,
+        pin_order INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `, (err) => {
+      if (err) {
+        console.error('Error creating templates table:', err);
+      } else {
+        console.log('Templates table ready');
+      }
+    });
   });
 
   return db;
@@ -322,6 +339,97 @@ function getUnviewedCount(db) {
   });
 }
 
+function addTemplate(db, title, text) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      'INSERT INTO templates (title, text) VALUES (?, ?)',
+      [title, text],
+      function(err) {
+        if (err) {
+          console.error('Error adding template:', err);
+          reject(err);
+        } else {
+          resolve({ success: true, id: this.lastID, message: 'Template added!' });
+        }
+      }
+    );
+  });
+}
+
+function updateTemplate(db, id, title, text) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      'UPDATE templates SET title = ?, text = ? WHERE id = ?',
+      [title, text, id],
+      function(err) {
+        if (err) {
+          console.error('Error updating template:', err);
+          reject(err);
+        } else {
+          resolve({ success: true, message: 'Template updated!' });
+        }
+      }
+    );
+  });
+}
+
+function deleteTemplate(db, id) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      'DELETE FROM templates WHERE id = ?',
+      [id],
+      function(err) {
+        if (err) {
+          console.error('Error deleting template:', err);
+          reject(err);
+        } else {
+          resolve({ success: true, message: 'Template deleted!' });
+        }
+      }
+    );
+  });
+}
+
+function getAllTemplates(db) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      'SELECT * FROM templates ORDER BY is_pinned DESC, pin_order ASC, created_at DESC',
+      (err, rows) => {
+        if (err) {
+          console.error('Error fetching templates:', err);
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      }
+    );
+  });
+}
+
+function toggleTemplatePin(db, id) {
+  return new Promise((resolve, reject) => {
+    db.get('SELECT is_pinned FROM templates WHERE id = ?', [id], (err, row) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      const newPinStatus = row.is_pinned === 1 ? 0 : 1;
+      db.run(
+        'UPDATE templates SET is_pinned = ? WHERE id = ?',
+        [newPinStatus, id],
+        function(err) {
+          if (err) {
+            console.error('Error toggling template pin:', err);
+            reject(err);
+          } else {
+            resolve({ success: true, isPinned: newPinStatus === 1 });
+          }
+        }
+      );
+    });
+  });
+}
+
 module.exports = { 
   initDB, 
   addReminder,
@@ -336,5 +444,10 @@ module.exports = {
   getNextUpcomingReminder,
   getAllReminders,
   getArchivedReminders,
-  getUnviewedCount
+  getUnviewedCount,
+  addTemplate,
+  updateTemplate,
+  deleteTemplate,
+  getAllTemplates,
+  toggleTemplatePin
 };

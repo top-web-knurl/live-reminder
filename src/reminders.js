@@ -12,7 +12,12 @@ const {
   getNextUpcomingReminder, 
   getAllReminders,
   getArchivedReminders,
-  getUnviewedCount
+  getUnviewedCount,
+  addTemplate,
+  updateTemplate,
+  deleteTemplate,
+  getAllTemplates,
+  toggleTemplatePin
 } = require('./db');
 
 let db;
@@ -88,6 +93,31 @@ async function getUnviewedCountFromDB() {
   return await getUnviewedCount(database);
 }
 
+async function addTemplateToDB(title, text) {
+  const database = getDB();
+  return await addTemplate(database, title, text);
+}
+
+async function updateTemplateInDB(id, title, text) {
+  const database = getDB();
+  return await updateTemplate(database, id, title, text);
+}
+
+async function deleteTemplateInDB(id) {
+  const database = getDB();
+  return await deleteTemplate(database, id);
+}
+
+async function getAllTemplatesFromDB() {
+  const database = getDB();
+  return await getAllTemplates(database);
+}
+
+async function toggleTemplatePinInDB(id) {
+  const database = getDB();
+  return await toggleTemplatePin(database, id);
+}
+
 module.exports = { 
   getDB, 
   addReminderToDB,
@@ -102,5 +132,10 @@ module.exports = {
   markReminderShownInDB,
   getAllRemindersFromDB,
   getArchivedRemindersFromDB,
-  getUnviewedCountFromDB
+  getUnviewedCountFromDB,
+  addTemplateToDB,
+  updateTemplateInDB,
+  deleteTemplateInDB,
+  getAllTemplatesFromDB,
+  toggleTemplatePinInDB
 };

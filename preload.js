@@ -18,5 +18,12 @@ contextBridge.exposeInMainWorld('dbAPI', {
   togglePin: (id) => ipcRenderer.invoke('toggle-pin', id),
   
   // Status operations
-  markViewed: (id) => ipcRenderer.invoke('mark-viewed', id)
+  markViewed: (id) => ipcRenderer.invoke('mark-viewed', id),
+
+  // Template CRUD
+  addTemplate: (title, text) => ipcRenderer.invoke('add-template', title, text),
+  updateTemplate: (id, title, text) => ipcRenderer.invoke('update-template', id, title, text),
+  deleteTemplate: (id) => ipcRenderer.invoke('delete-template', id),
+  getAllTemplates: () => ipcRenderer.invoke('get-all-templates'),
+  toggleTemplatePin: (id) => ipcRenderer.invoke('toggle-template-pin', id)
 });

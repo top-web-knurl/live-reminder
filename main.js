@@ -20,7 +20,12 @@ const {
   markReminderShownInDB,
   getAllRemindersFromDB,
   getArchivedRemindersFromDB,
-  getUnviewedCountFromDB
+  getUnviewedCountFromDB,
+  addTemplateToDB,
+  updateTemplateInDB,
+  deleteTemplateInDB,
+  getAllTemplatesFromDB,
+  toggleTemplatePinInDB
 } = require('./src/reminders');
 
 let mainWindow = null;
@@ -149,6 +154,52 @@ ipcMain.handle('get-unviewed-count', async () => {
   } catch (e) {
     console.error('IPC get-unviewed-count error:', e);
     return 0;
+  }
+});
+
+ipcMain.handle('add-template', async (event, title, text) => {
+  try {
+    return await addTemplateToDB(title, text);
+  } catch (e) {
+    console.error('IPC add-template error:', e);
+    return { success: false, message: e.message };
+  }
+});
+
+ipcMain.handle('update-template', async (event, id, title, text) => {
+  try {
+    return await updateTemplateInDB(id, title, text);
+  } catch (e) {
+    console.error('IPC update-template error:', e);
+    return { success: false, message: e.message };
+  }
+});
+
+ipcMain.handle('delete-template', async (event, id) => {
+  try {
+    return await deleteTemplateInDB(id);
+  } catch (e) {
+    console.error('IPC delete-template error:', e);
+    return { success: false, message: e.message };
+  }
+});
+
+ipcMain.handle('get-all-templates', async () => {
+  try {
+    const templates = await getAllTemplatesFromDB();
+    return { success: true, templates };
+  } catch (e) {
+    console.error('IPC get-all-templates error:', e);
+    return { success: false, message: e.message, templates: [] };
+  }
+});
+
+ipcMain.handle('toggle-template-pin', async (event, id) => {
+  try {
+    return await toggleTemplatePinInDB(id);
+  } catch (e) {
+    console.error('IPC toggle-template-pin error:', e);
+    return { success: false, message: e.message };
   }
 });
 

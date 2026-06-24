@@ -16,8 +16,9 @@
         <img src="assets/icon.png" alt="Напоминалка" class="header-logo">
         <div class="search">
           <input type="text" id="searchInput" placeholder="Поиск">
-          <button id="clearSearch" class="clear-search" style="display: none;">&times;</button>
+          <button id="clearSearch" class="clear-search" style="display: none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
         </div>
+        <button id="themeToggle" class="theme-toggle" title="Сменить тему"></button>
       </header>
       <div class="app__primary">
         <aside class="left-col">
@@ -26,6 +27,7 @@
               Напоминания
               <span id="overdueCount" class="badge" style="display: none;"></span>
             </li>
+            <li class="menu-item" data-tab="templates">Шаблоны</li>
             <li class="menu-item" data-tab="archive">Архив</li>
           </ul>
         </aside>
@@ -52,6 +54,18 @@
               <!-- Archived reminders will be loaded here -->
             </div>
           </div>
+
+          <!-- Templates Tab -->
+          <div id="templatesTab" class="tab-content">
+            <div class="reminder-list">
+              <div class="reminder-list__add" id="openTemplateModalBtn">
+                Добавить шаблон +
+              </div>
+              <div id="templatesContainer">
+                <!-- Templates will be loaded here -->
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </div>
@@ -63,7 +77,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2 id="modalTitle">Новое напоминание</h2>
-        <button class="modal-close" id="closeModalBtn">&times;</button>
+        <button class="modal-close" id="closeModalBtn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
       </div>
       <form id="reminderForm">
         <input type="hidden" id="reminderId" value="">
@@ -72,8 +86,25 @@
           <input type="text" id="reminderTitle" name="title" required placeholder="Введите название напоминания">
         </div>
         <div class="form-group">
-          <label for="reminderText">Описание</label>
-          <textarea id="reminderText" name="text" rows="4" placeholder="Дополнительная информация (необязательно)"></textarea>
+          <label>Описание</label>
+          <div class="editor">
+            <div class="editor-toolbar" id="editorToolbar">
+              <button type="button" class="toolbar-btn" data-command="bold" title="Жирный (Ctrl+B)"><b>B</b></button>
+              <button type="button" class="toolbar-btn" data-command="italic" title="Курсив (Ctrl+I)"><i>I</i></button>
+              <button type="button" class="toolbar-btn" data-command="underline" title="Подчёркнутый (Ctrl+U)"><u>U</u></button>
+              <button type="button" class="toolbar-btn" data-command="strikeThrough" title="Зачёркнутый"><s>S</s></button>
+              <span class="toolbar-separator"></span>
+              <button type="button" class="toolbar-btn" data-command="formatBlock" data-value="H2" title="Заголовок">H</button>
+              <button type="button" class="toolbar-btn" data-command="insertUnorderedList" title="Маркированный список">&bull;</button>
+              <button type="button" class="toolbar-btn" data-command="insertOrderedList" title="Нумерованный список">1.</button>
+              <button type="button" class="toolbar-btn" data-command="formatBlock" data-value="BLOCKQUOTE" title="Цитата">&ldquo;</button>
+              <button type="button" class="toolbar-btn" data-command="insertHorizontalRule" title="Разделитель">&mdash;</button>
+              <span class="toolbar-separator"></span>
+              <button type="button" class="toolbar-btn toolbar-btn--icon" data-command="insertCode" title="Код">&lt;/&gt;</button>
+              <button type="button" class="toolbar-btn toolbar-btn--icon" data-command="insertCodeBlock" title="Блок кода">{ }</button>
+            </div>
+            <div id="reminderText" class="editor-content" contenteditable="true" placeholder="Дополнительная информация (необязательно)"></div>
+          </div>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -107,6 +138,84 @@
         <button class="btn btn-secondary" id="confirmCancel">Отмена</button>
         <button class="btn btn-danger" id="confirmOk">Удалить</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Code Block Modal -->
+  <div id="codeBlockModal" class="modal">
+    <div class="modal-overlay" id="codeBlockOverlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Вставить блок кода</h2>
+        <button class="modal-close" id="closeCodeBlockBtn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div>
+        <div class="form-group">
+          <label for="codeLanguage">Язык</label>
+          <select id="codeLanguage" class="code-language-select">
+            <option value="">Без подсветки</option>
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="html">HTML</option>
+            <option value="css">CSS</option>
+            <option value="json">JSON</option>
+            <option value="sql">SQL</option>
+            <option value="bash">Bash</option>
+            <option value="plaintext">Plain Text</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="codeContent">Код</label>
+          <textarea id="codeContent" class="code-textarea" rows="12" placeholder="Вставьте код здесь..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="cancelCodeBlockBtn">Отмена</button>
+          <button type="button" class="btn btn-primary" id="insertCodeBlockBtn">Вставить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create/Edit Template Modal -->
+  <div id="templateModal" class="modal">
+    <div class="modal-overlay" id="templateModalOverlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="templateModalTitle">Новый шаблон</h2>
+        <button class="modal-close" id="closeTemplateModalBtn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <form id="templateForm">
+        <input type="hidden" id="templateId" value="">
+        <div class="form-group">
+          <label for="templateTitle">Название *</label>
+          <input type="text" id="templateTitle" name="title" required placeholder="Введите название шаблона">
+        </div>
+        <div class="form-group">
+          <label>Содержимое</label>
+          <div class="editor">
+            <div class="editor-toolbar" id="templateEditorToolbar">
+              <button type="button" class="toolbar-btn" data-command="bold" title="Жирный (Ctrl+B)"><b>B</b></button>
+              <button type="button" class="toolbar-btn" data-command="italic" title="Курсив (Ctrl+I)"><i>I</i></button>
+              <button type="button" class="toolbar-btn" data-command="underline" title="Подчёркнутый (Ctrl+U)"><u>U</u></button>
+              <button type="button" class="toolbar-btn" data-command="strikeThrough" title="Зачёркнутый"><s>S</s></button>
+              <span class="toolbar-separator"></span>
+              <button type="button" class="toolbar-btn" data-command="formatBlock" data-value="H2" title="Заголовок">H</button>
+              <button type="button" class="toolbar-btn" data-command="insertUnorderedList" title="Маркированный список">&bull;</button>
+              <button type="button" class="toolbar-btn" data-command="insertOrderedList" title="Нумерованный список">1.</button>
+              <button type="button" class="toolbar-btn" data-command="formatBlock" data-value="BLOCKQUOTE" title="Цитата">&ldquo;</button>
+              <button type="button" class="toolbar-btn" data-command="insertHorizontalRule" title="Разделитель">&mdash;</button>
+              <span class="toolbar-separator"></span>
+              <button type="button" class="toolbar-btn toolbar-btn--icon" data-command="insertCode" title="Код">&lt;/&gt;</button>
+              <button type="button" class="toolbar-btn toolbar-btn--icon" data-command="insertCodeBlock" title="Блок кода">{ }</button>
+            </div>
+            <div id="templateText" class="editor-content" contenteditable="true" placeholder="Текст шаблона (необязательно)"></div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="cancelTemplateBtn">Отмена</button>
+          <button type="submit" class="btn btn-primary" id="saveTemplateBtn">Сохранить</button>
+        </div>
+      </form>
     </div>
   </div>
 
