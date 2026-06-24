@@ -751,6 +751,44 @@ body {
   white-space: pre;
 }
 
+.code-block {
+  position: relative;
+}
+
+.code-block pre {
+  margin: 8px 0;
+}
+
+.code-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+  color: #888;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.code-block:hover .code-copy-btn {
+  opacity: 1;
+}
+
+.code-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.code-copy-btn.copied {
+  color: #4caf50;
+}
+
 .code-language-select {
   width: 100%;
   padding: 10px 12px;
@@ -855,6 +893,10 @@ body {
   font-size: 13px;
   line-height: 1.5;
   white-space: pre;
+}
+
+.reminder-card__text .code-block pre {
+  margin: 8px 0;
 }
 
 .form-row {
