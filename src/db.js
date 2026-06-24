@@ -1,12 +1,21 @@
-const sqlite3 = require('sqlite3').verbose();
+let sqlite3 = null;
 const path = require('path');
 const { app } = require('electron');
+
+const CURRENT_SCHEMA_VERSION = 2;
+
+function getSqlite() {
+  if (!sqlite3) {
+    sqlite3 = require('sqlite3').verbose();
+  }
+  return sqlite3;
+}
 
 function initDB() {
   const dbPath = path.join(app.getPath('userData'), 'reminders.db');
   console.log('Database path:', dbPath);
   
-  const db = new sqlite3.Database(dbPath, (err) => {
+  const db = new (getSqlite()).Database(dbPath, (err) => {
     if (err) {
       console.error('Error opening database:', err);
     } else {
@@ -35,33 +44,6 @@ function initDB() {
         console.error('Error creating table:', err);
       } else {
         console.log('Reminders table ready');
-        
-        db.all("PRAGMA table_info(reminders)", (err, columns) => {
-          if (err) {
-            console.error('Error checking table structure:', err);
-            return;
-          }
-          
-          const columnNames = columns.map(col => col.name);
-          const newColumns = [
-            { name: 'reminder_time', type: 'DATETIME' },
-            { name: 'is_shown', type: 'INTEGER DEFAULT 0' },
-            { name: 'is_archived', type: 'INTEGER DEFAULT 0' },
-            { name: 'is_viewed', type: 'INTEGER DEFAULT 0' },
-            { name: 'is_pinned', type: 'INTEGER DEFAULT 0' },
-            { name: 'pin_order', type: 'INTEGER DEFAULT 0' },
-            { name: 'last_reminded_at', type: 'DATETIME' }
-          ];
-          
-          newColumns.forEach(col => {
-            if (!columnNames.includes(col.name)) {
-              db.run(`ALTER TABLE reminders ADD COLUMN ${col.name} ${col.type}`, (err) => {
-                if (err) console.error(`Error adding ${col.name} column:`, err);
-                else console.log(`Added ${col.name} column`);
-              });
-            }
-          });
-        });
       }
     });
 
@@ -81,9 +63,43 @@ function initDB() {
         console.log('Templates table ready');
       }
     });
+
+    db.get('PRAGMA user_version', (err, row) => {
+      if (err) return;
+      const version = row.user_version;
+      if (version < CURRENT_SCHEMA_VERSION) {
+        console.log(`Migrating schema from v${version} to v${CURRENT_SCHEMA_VERSION}`);
+        runMigrations(db, version);
+      }
+    });
   });
 
   return db;
+}
+
+function runMigrations(db, fromVersion) {
+  if (fromVersion < 1) {
+    const columns = [
+      { name: 'reminder_time', type: 'DATETIME' },
+      { name: 'is_shown', type: 'INTEGER DEFAULT 0' },
+      { name: 'is_archived', type: 'INTEGER DEFAULT 0' },
+      { name: 'is_viewed', type: 'INTEGER DEFAULT 0' },
+      { name: 'is_pinned', type: 'INTEGER DEFAULT 0' },
+      { name: 'pin_order', type: 'INTEGER DEFAULT 0' },
+      { name: 'last_reminded_at', type: 'DATETIME' }
+    ];
+    db.all("PRAGMA table_info(reminders)", (err, existing) => {
+      if (err) return;
+      const names = existing.map(c => c.name);
+      columns.forEach(col => {
+        if (!names.includes(col.name)) {
+          db.run(`ALTER TABLE reminders ADD COLUMN ${col.name} ${col.type}`);
+        }
+      });
+    });
+  }
+
+  db.run(`PRAGMA user_version = ${CURRENT_SCHEMA_VERSION}`);
 }
 
 function addReminder(db, title, text, reminderTime) {

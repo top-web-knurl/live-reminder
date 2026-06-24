@@ -1,7 +1,6 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, Notification } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { createCanvas, loadImage } = require('canvas'); // for tray badge
 
 // Set proper app name for Windows notifications
 app.setName('Напоминалка');
@@ -267,6 +266,16 @@ ipcMain.handle('import-db', async () => {
 });
 
 // ---------------- TRAY BADGE & TASKBAR OVERLAY ---------------- //
+let canvasModule = null;
+let cachedTrayImage = null;
+
+function getCanvas() {
+  if (!canvasModule) {
+    canvasModule = require('canvas');
+  }
+  return canvasModule;
+}
+
 async function updateTrayBadge() {
   try {
     const count = await getUnviewedCountFromDB();
@@ -275,28 +284,25 @@ async function updateTrayBadge() {
     if (!tray) return;
 
     if (count > 0) {
+      const { createCanvas, loadImage } = getCanvas();
       const countStr = count > 9 ? '9+' : count.toString();
 
       // --- 1. Taskbar Overlay (Badge only) ---
       if (mainWindow) {
         try {
-          // Create a small canvas for the overlay icon (usually 16x16 or 32x32 is good for overlay)
           const overlaySize = 32;
           const overlayCanvas = createCanvas(overlaySize, overlaySize);
           const oCtx = overlayCanvas.getContext('2d');
 
-          // Draw red circle filling the canvas
           oCtx.fillStyle = '#ff0000';
           oCtx.beginPath();
           oCtx.arc(overlaySize / 2, overlaySize / 2, overlaySize / 2, 0, Math.PI * 2);
           oCtx.fill();
 
-          // Draw white text
           oCtx.fillStyle = '#ffffff';
-          oCtx.font = `bold ${overlaySize * 0.6}px Arial`; // 60% of size
+          oCtx.font = `bold ${overlaySize * 0.6}px Arial`;
           oCtx.textAlign = 'center';
           oCtx.textBaseline = 'middle';
-          // Slight Y adjustment for vertical centering
           oCtx.fillText(countStr, overlaySize / 2, overlaySize / 2 + (overlaySize * 0.05));
 
           const overlayBuffer = overlayCanvas.toBuffer('image/png');
@@ -310,10 +316,12 @@ async function updateTrayBadge() {
       // --- 2. Tray Icon (Icon + Badge) ---
       let img;
       try {
-        if (fs.existsSync(trayIconPath)) {
+        if (!cachedTrayImage && fs.existsSync(trayIconPath)) {
           const buffer = fs.readFileSync(trayIconPath);
-          img = await loadImage(buffer);
-        } else {
+          cachedTrayImage = await loadImage(buffer);
+        }
+        img = cachedTrayImage;
+        if (!img) {
           tray.setImage(trayIconPath);
           return;
         }
@@ -323,16 +331,12 @@ async function updateTrayBadge() {
         return;
       }
 
-      // Resize to 128x128 for high DPI
       const size = 128;
       const canvas = createCanvas(size, size);
       const ctx = canvas.getContext('2d');
       
-      // Draw original icon
       ctx.drawImage(img, 0, 0, size, size);
       
-      // Draw Badge
-      // Use 45% of size for the badge circle
       const badgeSize = size * 0.45; 
       const badgeX = size - badgeSize;
       const badgeY = 0;
@@ -343,11 +347,9 @@ async function updateTrayBadge() {
       ctx.fill();
       
       ctx.fillStyle = '#ffffff';
-      // Font size: 75% of badge size
       ctx.font = `bold ${badgeSize * 0.75}px Arial`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      // Center text in the badge circle
       ctx.fillText(countStr, badgeX + badgeSize / 2, badgeY + badgeSize / 2 + (size * 0.03));
       
       const buffer = canvas.toBuffer('image/png');
@@ -355,7 +357,6 @@ async function updateTrayBadge() {
       tray.setImage(icon);
 
     } else {
-      // Clear badges if count is 0
       tray.setImage(trayIconPath);
       if (mainWindow) {
         mainWindow.setOverlayIcon(null, '');
@@ -455,7 +456,7 @@ function stopRecurringReminder(id) {
 app.whenReady().then(() => {
   createWindow();
   scheduleNextReminder();
-  updateTrayBadge();
+  setTimeout(() => updateTrayBadge(), 500);
 });
 
 function createWindow() {
