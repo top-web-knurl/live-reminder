@@ -29,6 +29,7 @@
             </li>
             <li class="menu-item" data-tab="templates">Шаблоны</li>
             <li class="menu-item" data-tab="archive">Архив</li>
+            <li class="menu-item" data-tab="settings"><span class="menu-item__icon" id="settingsIcon"></span> Настройки</li>
           </ul>
         </aside>
         <main class="main">
@@ -63,6 +64,40 @@
               </div>
               <div id="templatesContainer">
                 <!-- Templates will be loaded here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings Tab -->
+          <div id="settingsTab" class="tab-content">
+            <div class="settings">
+              <h2 class="settings__title">Настройки</h2>
+
+              <div class="settings-card">
+                <div class="settings-card__header">
+                  <h3 class="settings-card__title">Автозапуск</h3>
+                  <p class="settings-card__desc">Запускать приложение при включении компьютера</p>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="autostartToggle">
+                  <span class="toggle__slider"></span>
+                </label>
+              </div>
+
+              <div class="settings-card">
+                <div class="settings-card__header">
+                  <h3 class="settings-card__title">Экспорт базы данных</h3>
+                  <p class="settings-card__desc">Сохранить все напоминания и шаблоны в файл</p>
+                </div>
+                <button class="btn btn-primary" id="exportDbBtn">Экспорт</button>
+              </div>
+
+              <div class="settings-card">
+                <div class="settings-card__header">
+                  <h3 class="settings-card__title">Импорт базы данных</h3>
+                  <p class="settings-card__desc">Загрузить данные из файла (заменит текущие данные)</p>
+                </div>
+                <button class="btn btn-secondary" id="importDbBtn">Импорт</button>
               </div>
             </div>
           </div>

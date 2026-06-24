@@ -25,5 +25,11 @@ contextBridge.exposeInMainWorld('dbAPI', {
   updateTemplate: (id, title, text) => ipcRenderer.invoke('update-template', id, title, text),
   deleteTemplate: (id) => ipcRenderer.invoke('delete-template', id),
   getAllTemplates: () => ipcRenderer.invoke('get-all-templates'),
-  toggleTemplatePin: (id) => ipcRenderer.invoke('toggle-template-pin', id)
+  toggleTemplatePin: (id) => ipcRenderer.invoke('toggle-template-pin', id),
+
+  // Settings
+  getAutostart: () => ipcRenderer.invoke('get-autostart'),
+  setAutostart: (enabled) => ipcRenderer.invoke('set-autostart', enabled),
+  exportDb: () => ipcRenderer.invoke('export-db'),
+  importDb: () => ipcRenderer.invoke('import-db')
 });

@@ -203,6 +203,69 @@ ipcMain.handle('toggle-template-pin', async (event, id) => {
   }
 });
 
+// ---------------- SETTINGS ---------------- //
+ipcMain.handle('get-autostart', async () => {
+  try {
+    const settings = app.getLoginItemSettings();
+    return { success: true, enabled: settings.openAtLogin };
+  } catch (e) {
+    console.error('IPC get-autostart error:', e);
+    return { success: false, enabled: false };
+  }
+});
+
+ipcMain.handle('set-autostart', async (event, enabled) => {
+  try {
+    app.setLoginItemSettings({ openAtLogin: enabled });
+    return { success: true };
+  } catch (e) {
+    console.error('IPC set-autostart error:', e);
+    return { success: false, message: e.message };
+  }
+});
+
+ipcMain.handle('export-db', async () => {
+  try {
+    const { dialog } = require('electron');
+    const result = await dialog.showSaveDialog(mainWindow, {
+      title: 'Экспорт базы данных',
+      defaultPath: 'reminders-backup.db',
+      filters: [{ name: 'SQLite Database', extensions: ['db'] }]
+    });
+
+    if (result.canceled) return { success: false, canceled: true };
+
+    const dbPath = path.join(app.getPath('userData'), 'reminders.db');
+    fs.copyFileSync(dbPath, result.filePath);
+    return { success: true };
+  } catch (e) {
+    console.error('IPC export-db error:', e);
+    return { success: false, message: e.message };
+  }
+});
+
+ipcMain.handle('import-db', async () => {
+  try {
+    const { dialog } = require('electron');
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: 'Импорт базы данных',
+      filters: [{ name: 'SQLite Database', extensions: ['db'] }],
+      properties: ['openFile']
+    });
+
+    if (result.canceled) return { success: false, canceled: true };
+
+    const dbPath = path.join(app.getPath('userData'), 'reminders.db');
+    fs.copyFileSync(result.filePaths[0], dbPath);
+    app.relaunch();
+    app.exit(0);
+    return { success: true };
+  } catch (e) {
+    console.error('IPC import-db error:', e);
+    return { success: false, message: e.message };
+  }
+});
+
 // ---------------- TRAY BADGE & TASKBAR OVERLAY ---------------- //
 async function updateTrayBadge() {
   try {
