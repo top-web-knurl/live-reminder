@@ -16,7 +16,7 @@
         <img src="assets/icon.png" alt="Напоминалка" class="header-logo">
         <div class="search">
           <input type="text" id="searchInput" placeholder="Поиск">
-          <button id="clearSearch" class="clear-search" style="display: none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+          <button id="clearSearch" class="clear-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
         </div>
         <button id="themeToggle" class="theme-toggle" title="Сменить тему"></button>
       </header>
@@ -24,12 +24,25 @@
         <aside class="left-col">
           <ul class="left-col__menu">
             <li class="menu-item active" data-tab="reminders">
+              <span class="menu-item__icon" id="remindersIcon"></span>
               Напоминания
               <span id="overdueCount" class="badge" style="display: none;"></span>
             </li>
-            <li class="menu-item" data-tab="templates">Шаблоны</li>
-            <li class="menu-item" data-tab="archive">Архив</li>
-            <li class="menu-item" data-tab="settings"><span class="menu-item__icon" id="settingsIcon"></span> Настройки</li>
+            <li class="menu-item" data-tab="templates">
+              <span class="menu-item__icon" id="templatesIcon"></span>
+              Шаблоны
+            </li>
+            <li class="menu-item" data-tab="archive">
+              <span class="menu-item__icon" id="archiveIcon"></span>
+              Архив
+            </li>
+          </ul>
+          <div class="left-col__separator"></div>
+          <ul class="left-col__menu">
+            <li class="menu-item" data-tab="settings">
+              <span class="menu-item__icon" id="settingsIcon"></span>
+              Настройки
+            </li>
           </ul>
         </aside>
         <main class="main">
