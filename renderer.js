@@ -1164,5 +1164,29 @@ function applySyntaxHighlighting(container) {
     const lang = codeEl.className.replace('language-', '');
     const originalCode = codeEl.textContent;
     codeEl.innerHTML = highlightCode(originalCode, lang);
+
+    const pre = codeEl.parentElement;
+    if (pre && !pre.parentElement.classList.contains('code-block')) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'code-copy-btn';
+      copyBtn.innerHTML = ICONS.copy;
+      copyBtn.title = 'Копировать';
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(originalCode).then(() => {
+          copyBtn.classList.add('copied');
+          copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+          setTimeout(() => {
+            copyBtn.classList.remove('copied');
+            copyBtn.innerHTML = ICONS.copy;
+          }, 1500);
+        });
+      });
+      wrapper.appendChild(copyBtn);
+    }
   });
 }
